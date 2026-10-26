@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "litematica_v7_compat",
+  "version": "${version}",
+  "name": "Litematica V7 Compat",
+  "description": "Charge les schématiques Litematica de format v7 (MC 1.20.5+) dans Litematica 1.17.1 en les convertissant à la volée en mémoire (v6). Aucune interface, aucun fichier créé.",
+  "authors": [],
+  "license": "MIT",
+  "environment": "client",
+  "mixins": [
+    "litematica_v7_compat.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "minecraft": "1.17.x",
+    "java": ">=16",
+    "litematica": "*"
+  }
+}
