@@ -1,46 +1,53 @@
 # Litematica V7 Compat (Fabric 1.17.1)
 
-Addon pour **Litematica 1.17.1** : quand une schématique est de **format v7** (créée sur Minecraft 1.20.5+ / 1.21+ / 26.x),
-elle est convertie **en mémoire** au moment du chargement, puis chargée normalement.
+An addon for Litematica 1.17.1: when a schematic uses the V7 format (created in Minecraft 1.20.5+ / 1.21+ / 26.x), it is converted in memory when loaded, then loaded normally.
 
-- Pas d'interface, pas de bouton, pas de config.
-- Aucun fichier créé ni modifié : le `.litematic` d'origine reste intact.
-- Les schématiques v6 (et inférieures) ne sont pas touchées.
-- Si une version de Litematica gère un jour la v7 elle-même, le mod ne fait plus rien tout seul
-  (il lit `LitematicaSchematic.SCHEMATIC_VERSION` par réflexion).
+- No interface, no buttons, no configuration.
+- No files are created or modified: the original `.litematic` file remains untouched.
+- V6 schematics (and earlier versions) are not affected.
+- If a future version of Litematica supports V7 natively, this mod automatically stops doing anything (it checks `LitematicaSchematic.SCHEMATIC_VERSION` using reflection).
 
-La logique est un port Java de la descente de version de `litematica-converter` (index.js) :
+The conversion logic is a Java port of the downgrade functionality from `litematica-converter` (`index.js`):
 
-| Élément | Conversion |
+| Element | Conversion |
 |---|---|
-| Palette de blocs | `short_grass` → `grass`, `crafter` → `dropper`, `copper_bulb` → `redstone_lamp`, `copper_door/trapdoor` → `iron_*`, `pale_oak_*` → `dark_oak_*`, `creaking_heart` → `dark_oak_log`, `resin_*` → `orange_concrete` |
-| Panneaux | `front_text` / `back_text` / `is_waxed` → `Text1..4`, `Color`, `GlowingText` |
-| Items (coffres, item frames, shulkers...) | `count` (int) → `Count` (byte), `components` → `tag` (dégâts, enchantements, nom, lore, potion, custom_data, contenu des shulkers) |
-| Ticks | `PendingBlockTicks` / `PendingFluidTicks` ajoutés s'ils manquent |
-| En-tête | `Version` = 6, `MinecraftDataVersion` = version du jeu (2730) |
+| Block palette | `short_grass` → `grass`, `crafter` → `dropper`, `copper_bulb` → `redstone_lamp`, `copper_door/trapdoor` → `iron_*`, `pale_oak_*` → `dark_oak_*`, `creaking_heart` → `dark_oak_log`, `resin_*` → `orange_concrete` |
+| Signs | `front_text` / `back_text` / `is_waxed` → `Text1..4`, `Color`, `GlowingText` |
+| Items (chests, item frames, shulkers, etc.) | `count` (int) → `Count` (byte), `components` → `tag` (damage, enchantments, name, lore, potions, custom data, shulker contents) |
+| Ticks | `PendingBlockTicks` / `PendingFluidTicks` are added if missing |
+| Header | `Version` = 6, `MinecraftDataVersion` = game version (2730) |
 
-## Compiler
+## Building
 
-Prérequis : **JDK 17** (Gradle 7.3 ne supporte pas JDK 21).
+Requirements: JDK 17 (Gradle 7.3 does not support JDK 21).
 
+```bash
+gradle build
 ```
-gradle build          # avec Gradle 7.3.x installé
+
+This requires Gradle 7.3.x to be installed.
+
+Alternatively, open the project directory in IntelliJ IDEA (automatic Gradle import), then run the `build` task. The JAR file will be generated at:
+
+`build/libs/litematica-v7-compat-1.0.0.jar`
+
+Without a development environment, push this project to a GitHub repository. The Actions tab will build the JAR file using the `.github/workflows/build.yml` workflow and make it available for download.
+
+## Installation
+
+Place the JAR file in `.minecraft/mods/` alongside Fabric Loader, Litematica, and MaLiLib for Minecraft 1.17.1.
+
+When a V7 schematic is converted, a message will appear in `logs/latest.log`:
+
+```text
+[litematica_v7_compat] V7 schematic (DataVersion ...) converted in memory to V6 ...
 ```
 
-ou ouvrir le dossier dans IntelliJ IDEA (import Gradle automatique) puis tâche `build`.
-Le jar sort dans `build/libs/litematica-v7-compat-1.0.0.jar`.
+## Limitations
 
-Sans environnement de dev : pousser ce dossier sur un dépôt GitHub, l'onglet **Actions** compile le jar
-(workflow `.github/workflows/build.yml`) et le propose en téléchargement.
+- As with the original converter, only the blocks listed in the table above are replaced. Blocks that do not exist in Minecraft 1.17.1 (e.g. cherry wood, tuff bricks, etc.) are simply ignored by Litematica.
+- Entity data and block entity data introduced in Minecraft 1.20.5+ (other than signs and items) are not converted.
 
-## Installer
+## About
 
-Mettre le jar dans `.minecraft/mods/` avec Fabric Loader, Litematica et MaLiLib (1.17.1).
-Quand une schématique v7 est convertie, une ligne apparaît dans `logs/latest.log` :
-`[litematica_v7_compat] Schématique v7 (DataVersion ...) convertie en mémoire vers v6 ...`
-
-## Limites
-
-- Comme le convertisseur d'origine, seuls les blocs de la table ci-dessus sont remplacés ; un bloc inexistant en 1.17.1
-  (ex. cerisier, tuff bricks...) est simplement ignoré par Litematica.
-- Les données d'entités / block entities propres à 1.20.5+ (autres que panneaux et items) ne sont pas converties.
+This mod makes life easier for players using older versions of Minecraft, such as 1.17. In newer versions, a new schematic encoding format was introduced, and this mod automatically converts V7 schematics to V6.
